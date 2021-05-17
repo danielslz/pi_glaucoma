@@ -130,4 +130,5 @@ dmypy.json
 
 # project stuff
 .DS_STORE
+.vscode/
 images/
