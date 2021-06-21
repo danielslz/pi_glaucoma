@@ -4,6 +4,8 @@ import os
 
 from PIL import Image
 from math import ceil
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+from skimage import io
 
 
 def show_img(img):
@@ -26,21 +28,23 @@ def extract_roi(img):
 
 
 def pre_process_imgs(src, dest, filetype='jpg'):
+    # create dest if not exist
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+
     # list files in src
     with os.scandir(src) as entries:
         for entry in entries:
             if entry.is_file() and not entry.name.startswith('.'):
-                print(f'Processing {entry.name}')
+                print(f'Pre-processing {entry.name}')
                 # convert to np.array
-                img = np.asarray(Image.open(src + entry.name))
+                img = io.imread(src + entry.name)
                 # split
-                t_img = split_img(img)
+                s_img = split_img(img)
                 # extract roi
-                t_img = extract_roi(t_img)
-                # array to image
-                new_img = Image.fromarray(t_img)
+                new_img = extract_roi(s_img)
                 # save on dest
-                new_img.save(dest + entry.name)
+                io.imsave(dest + entry.name, new_img)
 
 
 def show_imgs(imgs, cols=3, width=15, height=4, font_size=15):
@@ -65,3 +69,12 @@ def show_imgs(imgs, cols=3, width=15, height=4, font_size=15):
     plt.show()
 
 
+def histogram(img):
+    figure = plt.figure()
+    canvas = FigureCanvasAgg(figure)
+    plt.hist(img.flatten(), 256, [0,256])
+    plt.axis('tight')
+    plt.close(figure) 
+    canvas.draw()
+    buf = canvas.buffer_rgba()
+    return Image.fromarray(np.asarray(buf))
