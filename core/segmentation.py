@@ -1,7 +1,9 @@
+import cv2
 import numpy as np
 
 from skimage.draw import ellipse_perimeter
-from skimage.measure import EllipseModel, label, regionprops
+from skimage.measure import label, regionprops
+from skimage.transform import hough_ellipse
 
 
 def get_neighborhood(x, y, shape):
@@ -82,19 +84,55 @@ def region_growing(img, start, threshold=10):
     return output
 
 
-def ellipse_fitting(img):
+def ellipse_fitting_3(img):
     output = np.zeros_like(img)
 
-    img[img == True] = 1
-    img[img == False] = 0
+    ((centx, centy), (width, height), angle) = cv2.fitEllipse(img)
+
+    cv2.ellipse(output, (int(centx),int(centy)), (int(width/2),int(height/2)), angle, 0, 360, (0,0,255), 2)
+
+    # output[cy, cx] = 1
+    return output
+
+
+def ellipse_fitting_2(img):
+    output = np.zeros_like(img)
+
+    # Perform a Hough Transform
+    # The accuracy corresponds to the bin size of a major axis.
+    # The value is chosen in order to get a single high accumulator.
+    # The threshold eliminates low accumulators
+    # result = hough_ellipse(img, accuracy=20, threshold=250, min_size=100, max_size=120)
+    result = hough_ellipse(img)
+    result.sort(order='accumulator')
+
+    # Estimated parameters for the ellipse
+    best = list(result[-1])
+    yc, xc, a, b = [int(round(x)) for x in best[1:5]]
+    orientation = best[5]
+
+    cy, cx = ellipse_perimeter(yc, xc, a, b, orientation)
+    output[cy, cx] = 1
+    return output
+
+
+def ellipse_fitting(img):
+    output = np.zeros_like(img)#.astype(int)
 
     region = label(img)
     props = regionprops(region)
     props = props[0]
-    row, col  = props.centroid
-    rr, cc = ellipse_perimeter(int(row), int(col), int(props.minor_axis_length*0.5), int(props.major_axis_length*0.5), orientation=props.orientation, shape=img.shape)
+    # row, col  = props.centroid
+    # rr, cc = ellipse_perimeter(int(row), int(col), int(props.minor_axis_length*0.5), int(props.major_axis_length*0.5), orientation=props.orientation, shape=img.shape)
+    # output[rr, cc] = 1
 
-    output[rr, cc] = 1
+    yc, xc = [int(round(x)) for x in props.centroid]
+    orientation = props.orientation
+    major_axis = int(round(props.major_axis_length/2.))
+    minor_axis = int(round(props.minor_axis_length/2.))
+    cy, cx = ellipse_perimeter(yc, xc, minor_axis, major_axis, orientation)
+    output[cy, cx] = 1
+
     return output
 
 

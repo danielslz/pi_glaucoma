@@ -2,9 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
-from PIL import Image
 from math import ceil
-from matplotlib.backends.backend_agg import FigureCanvasAgg
 from skimage import io
 
 
@@ -47,34 +45,21 @@ def pre_process_imgs(src, dest, filetype='jpg'):
                 io.imsave(dest + entry.name, new_img)
 
 
-def show_imgs(imgs, cols=3, width=15, height=4, font_size=15):
+def show_imgs(imgs, cols=3, width=15, height=3, font_size=15):
     if not imgs:
         print("No images to show.")
         return 
 
     rows = int(ceil(len(imgs) / float(cols)))
-    plt.figure(figsize=(width, height*rows))
+    plt.figure(figsize=(width, height*rows), tight_layout=True)
 
     for i, img in enumerate(imgs):
-        if type(img['data']) == np.ndarray:
-            img['data'] = Image.fromarray(img['data'])
         plt.subplot(rows, cols, i + 1)
-        # grayscale
-        if img['data'].mode == 'L':
-            plt.imshow(img['data'], cmap='gray', vmin=0, vmax=255)
+        if len(img['data'].shape) == 2:
+            # grayscale
+            plt.imshow(img['data'], cmap='gray')
         else:
             plt.imshow(img['data'])
         plt.title(img['title'], fontsize=font_size)
         plt.axis(False)
     plt.show()
-
-
-def histogram(img):
-    figure = plt.figure()
-    canvas = FigureCanvasAgg(figure)
-    plt.hist(img.flatten(), 256, [0,256])
-    plt.axis('tight')
-    plt.close(figure) 
-    canvas.draw()
-    buf = canvas.buffer_rgba()
-    return Image.fromarray(np.asarray(buf))
