@@ -11,7 +11,7 @@ from core import show_imgs
 from core.segmentation import region_growing, ellipse_fitting, draw_ellipse_fitting
 
 
-def cup_extraction(img, show_steps=False):
+def cup_extraction(img, show_steps=False, return_cup_area=False):
     p2, p98 = np.percentile(img, (2, 98))
     
     # original contrast stretching
@@ -74,6 +74,9 @@ def cup_extraction(img, show_steps=False):
         ]
 
         show_imgs(imgs, cols=5)
+    
+    if return_cup_area:
+        return g_img_ellipse
     
     return output
 

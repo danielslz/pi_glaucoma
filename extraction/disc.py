@@ -10,10 +10,10 @@ from skimage.util import invert
 from skimage.morphology import disk, opening, convex_hull_image
 
 from core import show_imgs
-from core.segmentation import region_growing, ellipse_fitting, draw_ellipse_fitting, ellipse_fitting_3
+from core.segmentation import ellipse_fitting, draw_ellipse_fitting
 
 
-def disc_extraction(img, show_steps=False):
+def disc_extraction(img, show_steps=False, return_disc_area=False):
     p2, p98 = np.percentile(img, (2, 98))
     
     # original contrast stretching
@@ -69,5 +69,8 @@ def disc_extraction(img, show_steps=False):
         ]
 
         show_imgs(imgs, cols=5)
+    
+    if return_disc_area:
+        return img_ellipse
     
     return output
