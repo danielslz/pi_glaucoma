@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from scipy.ndimage import binary_fill_holes
-from skimage import exposure, io
+from skimage import exposure, io, img_as_ubyte
 from skimage.color import rgb2hsv
 from skimage.feature import canny
 from skimage.filters import threshold_otsu
@@ -13,7 +13,7 @@ from core import show_imgs
 from core.segmentation import ellipse_fitting, draw_ellipse_fitting
 
 
-def disc_extraction(img, show_steps=False, return_disc_area=False):
+def disc_extraction(img, show_steps=False):
     p2, p98 = np.percentile(img, (2, 98))
     
     # original contrast stretching
@@ -49,8 +49,8 @@ def disc_extraction(img, show_steps=False, return_disc_area=False):
     img_disc = draw_ellipse_fitting(img, img_ellipse)
 
     # extract disc
-    output = img.copy()
-    output[img_mask == 0] = (0, 0, 0)
+    # output = img.copy()
+    # output[img_mask == 0] = (0, 0, 0)
 
     if show_steps:
         imgs = [
@@ -65,12 +65,26 @@ def disc_extraction(img, show_steps=False, return_disc_area=False):
             {'data': img_canny, 'title': 'canny edge detector'},
             {'data': img_mask, 'title': 'mask'},
             {'data': img_disc, 'title': 'disc detection'},
-            {'data': output, 'title': 'disc extraction'},
+            # {'data': output, 'title': 'disc extraction'},
         ]
 
         show_imgs(imgs, cols=5)
     
-    if return_disc_area:
-        return img_ellipse
-    
-    return output
+    return img_ellipse
+
+
+def bulk_disc_extraction(src, dest):
+    # create dest if not exist
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+
+    with os.scandir(src) as entries:
+        for entry in entries:
+            if entry.is_file() and not entry.name.startswith('.'):
+                print(f'Extracting disc of {entry.name}')
+                # convert to np.array
+                img = io.imread(src + entry.name)
+                # cup extraction
+                new_img = disc_extraction(img)
+                # save on dest
+                io.imsave(dest + entry.name, img_as_ubyte(new_img))
