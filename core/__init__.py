@@ -1,6 +1,6 @@
 import matplotlib.pyplot as plt
-import numpy as np
 import os
+import cv2
 
 from math import ceil
 from skimage import io
@@ -41,8 +41,9 @@ def pre_process_imgs(src, dest, filetype='jpg'):
                 s_img = split_img(img)
                 # extract roi
                 new_img = extract_roi(s_img)
-                # save on dest
-                io.imsave(dest + entry.name, new_img)
+                # save on dest as png
+                new_name = entry.name.split('.')[0] + '.png'
+                io.imsave(dest + new_name, new_img)
 
 
 def show_imgs(imgs, cols=3, width=15, height=3, font_size=15):
@@ -63,3 +64,9 @@ def show_imgs(imgs, cols=3, width=15, height=3, font_size=15):
         plt.title(img['title'], fontsize=font_size)
         plt.axis(False)
     plt.show()
+
+
+def add_text(img, text):
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    cv2.putText(img, text, (10, 30), font, 0.85, (255, 255, 255), 2, cv2.LINE_AA)
+    return img

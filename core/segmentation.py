@@ -1,6 +1,7 @@
 import numpy as np
 
 from skimage.draw import ellipse_perimeter
+from skimage.feature import canny
 from skimage.measure import label, regionprops
 
 
@@ -103,5 +104,28 @@ def draw_ellipse_fitting(img, ellipse):
     output = img.copy()
 
     output[ellipse > 0] = (0, 0, 255)
+
+    return output
+
+
+def ellipse_fitting_2(img):
+    from ellipse import LsqEllipse
+
+    output = np.zeros_like(img)
+
+    noisy_ellipse = canny(img)
+
+    result = np.where(noisy_ellipse == True)
+    X = np.array(list(zip(result[0], result[1])))
+
+    reg = LsqEllipse().fit(X)
+    center, width, height, phi = reg.as_parameters()
+
+    yc, xc = [int(round(x)) for x in center]
+    orientation = -1*phi
+    major_axis = int(round(max(width, height)))
+    minor_axis = int(round(min(width, height)))
+    cy, cx = ellipse_perimeter(yc, xc, minor_axis, major_axis, orientation=orientation, shape=img.shape)
+    output[cy, cx] = 1
 
     return output

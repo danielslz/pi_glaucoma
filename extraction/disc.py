@@ -6,8 +6,7 @@ from skimage import exposure, io, img_as_ubyte
 from skimage.color import rgb2hsv
 from skimage.feature import canny
 from skimage.filters import threshold_otsu
-from skimage.util import invert
-from skimage.morphology import disk, opening, convex_hull_image
+from skimage.morphology import disk, opening, convex_hull_image, remove_small_objects
 
 from core import show_imgs
 from core.segmentation import ellipse_fitting, draw_ellipse_fitting
@@ -32,6 +31,7 @@ def disc_extraction(img, show_steps=False):
 
     # opening
     img_opening = opening(img_mean_threshold, disk(15))
+    img_opening = remove_small_objects(img_opening, 30000)
 
     # convex hull
     img_convex_hull = convex_hull_image(img_opening)
