@@ -7,30 +7,31 @@ from extraction import analyze_cdr
 from extraction.cup import cup_extraction, bulk_cup_extraction
 from extraction.disc import disc_extraction, bulk_disc_extraction
 from measure import get_cdr
+from features import describe_lbp, describe_glcm, describe_color_moments
 
 
 BASE_DIR = dirname(abspath(__file__))
 
-## preprocess
-src_path = BASE_DIR + '/images/testing/'
-dst_path = BASE_DIR + '/images/testing/preprocessed/'
-pre_process_imgs(src_path, dst_path)
+# ## preprocess
+# src_path = BASE_DIR + '/images/testing/'
+# dst_path = BASE_DIR + '/images/testing/preprocessed/'
+# pre_process_imgs(src_path, dst_path)
 
-## bulk extraction
-src_path = BASE_DIR + '/images/testing/preprocessed/'
-# analyze cdr
-dst_path = BASE_DIR + '/images/testing/cdr/'
-analyze_cdr(src_path, dst_path)
-
-
-# ## stand alone
+# ## bulk extraction
 # src_path = BASE_DIR + '/images/testing/preprocessed/'
-# # open image
-# img = io.imread(src_path + '/G-1-L.jpg')
-# # img = io.imread(src_path + '/N-7-L.jpg')
-# # img = io.imread(src_path + '/N-2-R.jpg')
-# # img = io.imread(src_path + '/N-1-L.jpg')
-# # img = io.imread(src_path + '/N-91-L.jpg')
+# # analyze cdr
+# dst_path = BASE_DIR + '/images/testing/cdr/'
+# analyze_cdr(src_path, dst_path)
+
+
+## stand alone
+src_path = BASE_DIR + '/images/testing/preprocessed/'
+# open image
+# img = io.imread(src_path + '/G-1-L.png')
+img = io.imread(src_path + '/N-7-L.png')
+# img = io.imread(src_path + '/N-2-R.png')
+# img = io.imread(src_path + '/N-1-L.png')
+# img = io.imread(src_path + '/N-91-L.png')
 
 # # cup extraction
 # cup_area = cup_extraction(img, show_steps=True)
@@ -57,3 +58,18 @@ analyze_cdr(src_path, dst_path)
 # ]
 
 # show_imgs(imgs)
+
+
+## features
+
+# lbp
+lbp = describe_lbp(img, 12)
+print(lbp)
+
+# glcm / haralick
+glcm = describe_glcm(img)
+print(glcm)
+
+# color moments
+color_moments = describe_color_moments(img)
+print(color_moments)

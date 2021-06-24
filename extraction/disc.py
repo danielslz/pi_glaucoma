@@ -9,7 +9,7 @@ from skimage.filters import threshold_otsu
 from skimage.morphology import disk, opening, convex_hull_image, remove_small_objects
 
 from core import show_imgs
-from core.segmentation import ellipse_fitting, draw_ellipse_fitting
+from core.segmentation import ellipse_fitting, draw_ellipse_fitting, ellipse_fitting_2
 
 
 def disc_extraction(img, show_steps=False):

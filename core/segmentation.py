@@ -1,3 +1,4 @@
+import cv2
 import numpy as np
 
 from skimage.draw import ellipse_perimeter
@@ -116,16 +117,27 @@ def ellipse_fitting_2(img):
     noisy_ellipse = canny(img)
 
     result = np.where(noisy_ellipse == True)
-    X = np.array(list(zip(result[0], result[1])))
+    points = np.array(list(zip(result[0], result[1])))
 
-    reg = LsqEllipse().fit(X)
-    center, width, height, phi = reg.as_parameters()
+    # reg = LsqEllipse().fit(points)
+    # center, width, height, phi = reg.as_parameters()
 
-    yc, xc = [int(round(x)) for x in center]
-    orientation = -1*phi
-    major_axis = int(round(max(width, height)))
-    minor_axis = int(round(min(width, height)))
-    cy, cx = ellipse_perimeter(yc, xc, minor_axis, major_axis, orientation=orientation, shape=img.shape)
+    # yc, xc = [int(round(x)) for x in center]
+    # orientation = -1*phi
+    # major_axis = int(round(max(width, height)))
+    # minor_axis = int(round(min(width, height)))
+    
+    (xc, yc), (w, h), theta = cv2.fitEllipse(points)
+    xc = int(round(xc))
+    yc = int(round(yc))
+    orientation = -1*theta
+    major_axis = int(round(max(w, h)/2.))
+    minor_axis = int(round(min(w, h)/2.))
+
+    cy, cx = ellipse_perimeter(xc, yc, minor_axis, major_axis, orientation=orientation, shape=img.shape)
     output[cy, cx] = 1
+
+    # output = canny(img).astype(np.uint8)
+    # cv2.ellipse(output, (xc, yc), (int(w/2), int(h/2)), theta, 0, 360, (0,0,255), 1)
 
     return output
