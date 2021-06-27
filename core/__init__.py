@@ -20,15 +20,19 @@ def split_img(img):
 def extract_roi(img):
     h = img.shape[0]
     w = img.shape[1]
-    crop_h = int(h * 0.3)
+    crop_h = int(h * 0.25)
     crop_w = int(w * 0.2)
     return img[crop_h:h-crop_h, crop_w:w-crop_w]
 
 
 def pre_process_imgs(src, dest, filetype='jpg'):
-    # create dest if not exist
-    if not os.path.exists(dest):
-        os.makedirs(dest)
+    # create paths if not exist
+    dirs_to_check = [dest]
+    create_folders(dirs_to_check)
+    
+    # clean destination paths
+    for folder in dirs_to_check:
+        remove_files(folder)
 
     # list files in src
     with os.scandir(src) as entries:
@@ -70,3 +74,17 @@ def add_text(img, text):
     font = cv2.FONT_HERSHEY_SIMPLEX
     cv2.putText(img, text, (10, 30), font, 0.85, (255, 255, 255), 2, cv2.LINE_AA)
     return img
+
+
+def remove_files(src):
+    for f in os.listdir(src):
+        try:
+            os.remove(os.path.join(src, f))
+        except PermissionError:
+            pass
+
+
+def create_folders(folders):
+    for dir in folders:
+        if not os.path.exists(dir):
+            os.makedirs(dir)

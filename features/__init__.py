@@ -5,7 +5,12 @@ from skimage.color import rgb2gray
 from skimage.feature import local_binary_pattern, greycomatrix, greycoprops
 
 
-def describe_lbp(img, radius):
+LBP = 'lbp'
+HARALICK = 'haralick'
+COLOR_MOMENTS = 'color_moments'
+
+
+def describe_lbp(img, radius=12):
     eps = 1e-7
     n_points = 8 * radius
     img = rgb2gray(img)
@@ -18,10 +23,10 @@ def describe_lbp(img, radius):
     hist = hist.astype("float")
     hist /= (hist.sum() + eps)
 
-    return hist
+    return hist.tolist()
 
 
-def describe_glcm(img):
+def describe_haralick(img):
     img = rgb2gray(img)
     img = img_as_ubyte(img)
     img = np.asarray(img, dtype='int32')
