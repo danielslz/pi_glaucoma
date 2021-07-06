@@ -57,21 +57,24 @@ analyze_features(src_path, dest_path, features)
 # img = io.imread(src_path + '/N-2-R.png')
 # img = io.imread(src_path + '/N-1-L.png')
 
+
+# img = io.imread(src_path + '/G-38-L.png')
+
 # print(describe_lbp(img))
 
 # cup extraction
 # cup_area = cup_extraction(img, show_steps=True)
 # img_cup = draw_ellipse_fitting(img, cup_area)
 
-# # disc extraction
+# # # disc extraction
 # disc_area = disc_extraction(img, show_steps=True)
 # img_disc = draw_ellipse_fitting(img, disc_area)
 
-# # disc and cup on original
+# # # disc and cup on original
 # img_final = draw_ellipse_fitting(img, cup_area)
 # img_final = draw_ellipse_fitting(img_final, disc_area)
 
-# # get cdr
+# # # get cdr
 # cdr = get_cdr(cup_area, disc_area)
 # result = 'normal' if cdr <= 0.5 else 'glaucoma'
 

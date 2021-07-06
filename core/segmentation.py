@@ -3,6 +3,8 @@ import math
 
 from skimage.draw import ellipse
 from skimage.measure import label, regionprops
+from skimage.morphology import opening, remove_small_objects, disk
+from skimage.segmentation import clear_border
 
 
 def get_neighborhood(x, y, shape):
@@ -53,7 +55,7 @@ def get_neighborhood(x, y, shape):
     return out
 
 
-def region_growing(img, start, threshold=10):
+def region_growing_step(img, start, threshold=10):
     output = np.zeros_like(img)
     
     seeds = [start]
@@ -77,11 +79,22 @@ def region_growing(img, start, threshold=10):
                     except KeyError:
                         seeds.append(xy)
                     visited[xy] = True
+                else:
+                    output[xy] = 0
             except IndexError:
                 pass
-            else:
-                output[xy] = 0
         seeds.pop(0)
+
+    return output, np.count_nonzero(output == 255)
+
+
+def region_growing(img, start, threshold=10):
+    output, segmented = region_growing_step(img, start, threshold)
+
+    while(segmented < 1000):
+        # run again, increment threshold
+        threshold += 20
+        output, segmented = region_growing_step(img, start, threshold)
 
     return output
 
@@ -115,5 +128,15 @@ def draw_ellipse_fitting(img, ellipse):
     output = img.copy()
 
     output[ellipse > 0] = (0, 0, 255)
+
+    return output
+
+
+def opening_and_cleaning_area(img):
+    output = img.copy()
+
+    output = opening(output, disk(15))
+    output = remove_small_objects(output, 30000)
+    output = clear_border(output)
 
     return output

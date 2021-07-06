@@ -5,10 +5,10 @@ from skimage import exposure, io, img_as_ubyte
 from skimage.color import rgb2hsv
 from skimage.feature import canny
 from skimage.filters import threshold_otsu
-from skimage.morphology import disk, opening, convex_hull_image, remove_small_objects
+from skimage.morphology import convex_hull_image
 
 from core import show_imgs
-from core.segmentation import ellipse_fitting, draw_ellipse_fitting
+from core.segmentation import ellipse_fitting, draw_ellipse_fitting, opening_and_cleaning_area
 
 
 def disc_extraction(img, show_steps=False):
@@ -26,11 +26,10 @@ def disc_extraction(img, show_steps=False):
     
     # mean threshold
     thresh = threshold_otsu(img_hsv_contrast)
-    img_mean_threshold = img_hsv_contrast > thresh
+    img_threshold = img_hsv_contrast > thresh
 
     # opening
-    img_opening = opening(img_mean_threshold, disk(15))
-    img_opening = remove_small_objects(img_opening, 30000)
+    img_opening = opening_and_cleaning_area(img_threshold)
 
     # convex hull
     img_convex_hull = convex_hull_image(img_opening)
@@ -55,7 +54,7 @@ def disc_extraction(img, show_steps=False):
             {'data': img_hsv, 'title': 'Conversão para HSV (c)'},
             {'data': img_value, 'title': 'Canal Valor (d)'},
             {'data': img_hsv_contrast, 'title': 'Alargamento de Contraste (e)'},
-            {'data': img_mean_threshold, 'title': 'Otsu\'s Threshold (f)'},
+            {'data': img_threshold, 'title': 'Otsu\'s Threshold (f)'},
             {'data': img_opening, 'title': 'Abertura (g)'},
             {'data': img_convex_hull, 'title': 'Convex Hull (h)'},
             {'data': img_ellipse, 'title': 'Preenchimento de Elipse (i)'},
