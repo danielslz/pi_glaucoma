@@ -1,8 +1,7 @@
-import cv2
 import numpy as np
+import math
 
-from skimage.draw import ellipse_perimeter
-from skimage.feature import canny
+from skimage.draw import ellipse
 from skimage.measure import label, regionprops
 
 
@@ -67,16 +66,19 @@ def region_growing(img, start, threshold=10):
         output[seed] = 255
         nb = get_neighborhood(seed[0], seed[1], img.shape)
         for xy in nb:
-            xy_intensity = int(img[xy])
-            diff = abs(seed_intensity - xy_intensity)
-            if diff < threshold:
-                output[xy] = 255
-                try:
-                    if visited[xy]:
-                        pass
-                except KeyError:
-                    seeds.append(xy)
-                visited[xy] = True
+            try:
+                xy_intensity = int(img[xy])
+                diff = abs(seed_intensity - xy_intensity)
+                if diff < threshold:
+                    output[xy] = 255
+                    try:
+                        if visited[xy]:
+                            pass
+                    except KeyError:
+                        seeds.append(xy)
+                    visited[xy] = True
+            except IndexError:
+                pass
             else:
                 output[xy] = 0
         seeds.pop(0)
@@ -93,10 +95,18 @@ def ellipse_fitting(img):
 
     yc, xc = [int(round(x)) for x in props.centroid]
     orientation = props.orientation
-    major_axis = int(round(props.major_axis_length/2.))
-    minor_axis = int(round(props.minor_axis_length/2.))
-    cy, cx = ellipse_perimeter(yc, xc, minor_axis, major_axis, orientation)
-    output[cy, cx] = 1
+    major_axis = int(round(props.major_axis_length/2.0))
+    minor_axis = int(round(props.minor_axis_length/2.0))
+    rotation =  orientation + (math.pi/2.0)
+    cy, cx = ellipse(yc, xc, minor_axis, major_axis, rotation=rotation)
+    try:
+        output[cy, cx] = 1
+    except IndexError:
+        y_max = img.shape[0] - 1
+        x_max = img.shape[1] - 1
+        cy[cy > y_max] = (y_max - 1) 
+        cx[cx > x_max] = (x_max - 1)
+        output[cy, cx] = 1
 
     return output
 
@@ -105,39 +115,5 @@ def draw_ellipse_fitting(img, ellipse):
     output = img.copy()
 
     output[ellipse > 0] = (0, 0, 255)
-
-    return output
-
-
-def ellipse_fitting_2(img):
-    from ellipse import LsqEllipse
-
-    output = np.zeros_like(img)
-
-    noisy_ellipse = canny(img)
-
-    result = np.where(noisy_ellipse == True)
-    points = np.array(list(zip(result[0], result[1])))
-
-    # reg = LsqEllipse().fit(points)
-    # center, width, height, phi = reg.as_parameters()
-
-    # yc, xc = [int(round(x)) for x in center]
-    # orientation = -1*phi
-    # major_axis = int(round(max(width, height)))
-    # minor_axis = int(round(min(width, height)))
-    
-    (xc, yc), (w, h), theta = cv2.fitEllipse(points)
-    xc = int(round(xc))
-    yc = int(round(yc))
-    orientation = -1*theta
-    major_axis = int(round(max(w, h)/2.))
-    minor_axis = int(round(min(w, h)/2.))
-
-    cy, cx = ellipse_perimeter(xc, yc, minor_axis, major_axis, orientation=orientation, shape=img.shape)
-    output[cy, cx] = 1
-
-    # output = canny(img).astype(np.uint8)
-    # cv2.ellipse(output, (xc, yc), (int(w/2), int(h/2)), theta, 0, 360, (0,0,255), 1)
 
     return output

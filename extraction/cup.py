@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-from scipy.ndimage import binary_fill_holes
 from skimage import exposure, io, img_as_ubyte
 from skimage.feature import canny
 from skimage.util import invert
@@ -27,14 +26,14 @@ def cup_extraction(img, show_steps=False):
     g_img_inverted = invert(g_img_rescale)
 
     # opening
-    g_img_opening = opening(g_img_inverted, disk(40))  # disk(40)
+    g_img_opening = opening(g_img_inverted, disk(25))  # disk(40)
 
     # negative transform
     g_img_inverted_2 = invert(g_img_opening)
 
     # region grow
-    seed = np.unravel_index(g_img_inverted_2.argmax(), g_img_inverted_2.shape)
-    g_img_region_grow = region_growing(g_img_inverted_2, seed, threshold=35)
+    seed = np.unravel_index(g_img.argmax(), g_img.shape)
+    g_img_region_grow = region_growing(g_img_inverted_2, seed, threshold=15)  # threshold=25
 
     # convex hull
     g_img_convex_hull = convex_hull_image(g_img_region_grow)
@@ -44,12 +43,9 @@ def cup_extraction(img, show_steps=False):
 
     # canny edge detector
     g_img_canny = canny(g_img_ellipse)
-
-    # cup mask
-    g_img_mask = binary_fill_holes(g_img_canny)
     
     # cup on original
-    g_img_cup = draw_ellipse_fitting(img, g_img_ellipse)
+    g_img_cup = draw_ellipse_fitting(img, g_img_canny)
 
     # # extract cup
     # output = img.copy()
@@ -57,25 +53,24 @@ def cup_extraction(img, show_steps=False):
 
     if show_steps:
         imgs = [
-            {'data': img, 'title': 'original'},
-            {'data': img_contrast, 'title': 'contrast stretching'},
-            {'data': g_img, 'title': 'green channel'},
-            {'data': g_img_rescale, 'title': 'contrast stretching'},
-            {'data': g_img_inverted, 'title': 'negative transform'},
-            {'data': g_img_opening, 'title': 'opening'},
-            {'data': g_img_inverted_2, 'title': 'negative transform'},
-            {'data': g_img_region_grow, 'title': 'region grow'},
-            {'data': g_img_convex_hull, 'title': 'convex hull'},
-            {'data': g_img_ellipse, 'title': 'ellipse fitting'},
-            {'data': g_img_canny, 'title': 'canny edge detector'},
-            {'data': g_img_mask, 'title': 'mask'},
-            {'data': g_img_cup, 'title': 'cup detection'},
+            {'data': img, 'title': 'Original (a)'},
+            {'data': img_contrast, 'title': 'Alargamento de Contraste (b)'},
+            {'data': g_img, 'title': 'Canal Verde (c)'},
+            {'data': g_img_rescale, 'title': 'Alargamento de Contraste (d)'},
+            {'data': g_img_inverted, 'title': 'Transformação negativa (e)'},
+            {'data': g_img_opening, 'title': 'Abertura (f)'},
+            {'data': g_img_inverted_2, 'title': 'Transformação negativa (g)'},
+            {'data': g_img_region_grow, 'title': 'Region Growing (h)'},
+            {'data': g_img_convex_hull, 'title': 'Convex Hull (i)'},
+            {'data': g_img_ellipse, 'title': 'Preenchimento de Elipse (j)'},
+            {'data': g_img_canny, 'title': 'Canny (k)'},
+            {'data': g_img_cup, 'title': 'Escavação do Disco Óptico (l)'},
             # {'data': output, 'title': 'cup extraction'},
         ]
 
-        show_imgs(imgs, cols=5)
+        show_imgs(imgs, cols=4, font_size=10)
     
-    return g_img_ellipse
+    return g_img_canny
 
 
 def bulk_cup_extraction(src, dest):

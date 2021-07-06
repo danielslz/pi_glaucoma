@@ -1,6 +1,7 @@
 import os
 import csv
 
+from datetime import datetime
 from skimage import io
 from measure import get_cdr
 
@@ -19,6 +20,7 @@ def analyze_cdr(src_path, dest_path):
     create_folders(dirs_to_check)
     
     # clean destination paths
+    dirs_to_check.pop(0)
     for folder in dirs_to_check:
         remove_files(folder)
     
@@ -49,7 +51,8 @@ def analyze_cdr(src_path, dest_path):
                 # remove preprocessed file
                 # os.remove(src_path + entry.name)
 
-    dest = dest_path + "cdr_results.csv"
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    dest = dest_path + f'cdr_results_{now}.csv'
     with open(dest, mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         csv_writer.writerow(['file_name', 'cdr', 'expected', 'result', 'success'])

@@ -1,7 +1,6 @@
 import os
 import numpy as np
 
-from scipy.ndimage import binary_fill_holes
 from skimage import exposure, io, img_as_ubyte
 from skimage.color import rgb2hsv
 from skimage.feature import canny
@@ -9,7 +8,7 @@ from skimage.filters import threshold_otsu
 from skimage.morphology import disk, opening, convex_hull_image, remove_small_objects
 
 from core import show_imgs
-from core.segmentation import ellipse_fitting, draw_ellipse_fitting, ellipse_fitting_2
+from core.segmentation import ellipse_fitting, draw_ellipse_fitting
 
 
 def disc_extraction(img, show_steps=False):
@@ -22,8 +21,8 @@ def disc_extraction(img, show_steps=False):
     img_hsv = rgb2hsv(img_contrast)
 
     # hsv contrast stretching
-    value_img = img_hsv[:, :, 2]
-    img_hsv_contrast = exposure.rescale_intensity(value_img)
+    img_value = img_hsv[:, :, 2]
+    img_hsv_contrast = exposure.rescale_intensity(img_value)
     
     # mean threshold
     thresh = threshold_otsu(img_hsv_contrast)
@@ -41,12 +40,9 @@ def disc_extraction(img, show_steps=False):
 
     # canny edge detector
     img_canny = canny(img_ellipse)
-
-    # disc mask
-    img_mask = binary_fill_holes(img_canny)
     
     # disc on original
-    img_disc = draw_ellipse_fitting(img, img_ellipse)
+    img_disc = draw_ellipse_fitting(img, img_canny)
 
     # extract disc
     # output = img.copy()
@@ -54,23 +50,23 @@ def disc_extraction(img, show_steps=False):
 
     if show_steps:
         imgs = [
-            {'data': img, 'title': 'original'},
-            {'data': img_contrast, 'title': 'contrast stretching'},
-            {'data': img_hsv, 'title': 'convert to hsv'},
-            {'data': img_hsv_contrast, 'title': 'contrast stretching'},
-            {'data': img_mean_threshold, 'title': 'otsu threshold'},
-            {'data': img_opening, 'title': 'opening'},
-            {'data': img_convex_hull, 'title': 'convex hull'},
-            {'data': img_ellipse, 'title': 'ellipse fitting'},
-            {'data': img_canny, 'title': 'canny edge detector'},
-            {'data': img_mask, 'title': 'mask'},
-            {'data': img_disc, 'title': 'disc detection'},
+            {'data': img, 'title': 'Original (a)'},
+            {'data': img_contrast, 'title': 'Alargamento de Contraste (b)'},
+            {'data': img_hsv, 'title': 'Conversão para HSV (c)'},
+            {'data': img_value, 'title': 'Canal Valor (d)'},
+            {'data': img_hsv_contrast, 'title': 'Alargamento de Contraste (e)'},
+            {'data': img_mean_threshold, 'title': 'Otsu\'s Threshold (f)'},
+            {'data': img_opening, 'title': 'Abertura (g)'},
+            {'data': img_convex_hull, 'title': 'Convex Hull (h)'},
+            {'data': img_ellipse, 'title': 'Preenchimento de Elipse (i)'},
+            {'data': img_canny, 'title': 'Canny (j)'},
+            {'data': img_disc, 'title': 'Disco Óptico (k)'},
             # {'data': output, 'title': 'disc extraction'},
         ]
 
-        show_imgs(imgs, cols=5)
+        show_imgs(imgs, cols=4, font_size=10)
     
-    return img_ellipse
+    return img_canny
 
 
 def bulk_disc_extraction(src, dest):

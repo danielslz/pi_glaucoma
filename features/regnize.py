@@ -2,6 +2,7 @@ import os
 import csv
 import numpy as np
 
+from datetime import datetime
 from random import shuffle
 from skimage import io
 from sklearn.svm import LinearSVC
@@ -110,12 +111,16 @@ def analyze_features(src_path, dest_path, features):
                 img = io.imread(dest_path + 'testing/' + entry.name)
                 # extract features
                 f_data = []
+                tested_features = ''
                 if LBP in features:
                     f_data += describe_lbp(img)
+                    tested_features += LBP + '+'
                 if HARALICK in features:
                     f_data += describe_haralick(img)
+                    tested_features += HARALICK + '+'
                 if COLOR_MOMENTS in features:
                     f_data += describe_color_moments(img)
+                    tested_features += COLOR_MOMENTS + '+'
 
                 # predict result
                 prediction = model.predict(np.asarray(f_data).reshape(1, -1))
@@ -123,11 +128,11 @@ def analyze_features(src_path, dest_path, features):
                 expected = HEALTHY if entry.name[0] == 'N' else GLAUCOMA
 
                 # append result on csv
-                csv_rows.append([entry.name, expected, result, expected == result])
+                csv_rows.append([entry.name, tested_features[:-1], expected, result, expected == result])
 
-    
-    dest = dest_path + "features_results.csv"
+    now = datetime.now().strftime("%Y%m%d%H%M%S")
+    dest = dest_path + f'features_results_{now}.csv'
     with open(dest, mode='w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        csv_writer.writerow(['file_name', 'expected', 'result', 'success'])
+        csv_writer.writerow(['file_name', 'features', 'expected', 'result', 'success'])
         csv_writer.writerows(csv_rows)
