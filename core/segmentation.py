@@ -5,6 +5,7 @@ from skimage.draw import ellipse
 from skimage.measure import label, regionprops
 from skimage.morphology import opening, remove_small_objects, disk
 from skimage.segmentation import clear_border
+from skimage.util import invert
 
 
 def get_neighborhood(x, y, shape):
@@ -132,20 +133,21 @@ def draw_ellipse_fitting(img, ellipse):
     return output
 
 
-def get_big_areas(img):
+def must_crean_area(img):
     big_areas = 0
     region = label(img)
     for props in regionprops(region):
         # print(props.area)
         if props.area > 10_000:
             big_areas += 1
-    return big_areas
+
+    return big_areas > 1 or np.count_nonzero(clear_border(img) == True) == 0
 
 
 def remove_nonadjacent_area(img, element_size):
     output = img.copy()
     output = opening(output, disk(element_size))
-    output = remove_small_objects(output, 30000)
+    output = remove_small_objects(output, 40000)
 
     return output
 
@@ -154,17 +156,21 @@ def opening_and_cleaning_area(img, element_size=15):
     output = img.copy()
 
     output = remove_nonadjacent_area(output, element_size)
-    clean_area = get_big_areas(output) > 1
+    clean_area = must_crean_area(output)
 
     count = 1
     while(clean_area):
         element_size += 10
         output = remove_nonadjacent_area(output, element_size)
-        clean_area = get_big_areas(output) > 1
+        clean_area = must_crean_area(output)
         count += 1
         if count > 3:
             break
     
-    output = clear_border(output)
+    # output = clear_border(output)
+
+    # all zero, means glacoma, invert img
+    if np.count_nonzero(output == True) == 0:
+        output = invert(output)
 
     return output
