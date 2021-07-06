@@ -5,7 +5,7 @@ import numpy as np
 from datetime import datetime
 from random import shuffle
 from skimage import io
-from sklearn.svm import LinearSVC
+from sklearn.svm import LinearSVC, SVC
 from shutil import copyfile
 
 from core import create_folders, remove_files
@@ -16,7 +16,7 @@ HEALTHY = 'healthy'
 GLAUCOMA = 'glaucoma'
 
 
-def prepare_dataset(src_path, dest_path):
+def prepare_dataset(src_path, dest_path, train_factor=0.5):
     # divide images on 70/30 for training/test
     healthy = []
     glaucoma = []
@@ -30,13 +30,13 @@ def prepare_dataset(src_path, dest_path):
                 else:
                     glaucoma.append(entry.name)
     
-    # mix lists
+    # shuffle lists
     shuffle(healthy)
     shuffle(glaucoma)
 
     # copy files
-    healthy_limit = int(len(healthy) * 0.7)
-    glaucoma_limit = int(len(glaucoma) * 0.7)
+    healthy_limit = int(len(healthy) * train_factor)
+    glaucoma_limit = int(len(glaucoma) * train_factor)
 
     for index, file in enumerate(healthy):
         if index > healthy_limit:
@@ -95,9 +95,12 @@ def analyze_features(src_path, dest_path, features):
                 label = HEALTHY if entry.name[0] == 'N' else GLAUCOMA
                 labels.append(label)
 
-    # train a Linear SVM on the data
+    # train a SVM on the data
     # model = LinearSVC(C=100.0, random_state=42)
-    model = LinearSVC(random_state = 0, max_iter=1000)
+    # model = LinearSVC(random_state = 0, max_iter=1000)
+    # model = LinearSVC()
+    weight = {HEALTHY: 0.555, GLAUCOMA: 0.845}
+    model = SVC(kernel='linear', C = 5000.0, class_weight=weight)
     model.fit(data, labels)
 
     # testing
@@ -123,9 +126,11 @@ def analyze_features(src_path, dest_path, features):
                     tested_features += COLOR_MOMENTS + '+'
 
                 # predict result
-                prediction = model.predict(np.asarray(f_data).reshape(1, -1))
+                prediction = model.predict(np.array(f_data).reshape(1, -1))
                 result = prediction[0]
                 expected = HEALTHY if entry.name[0] == 'N' else GLAUCOMA
+                msg = f'Result: {result}'
+                print(msg)
 
                 # append result on csv
                 csv_rows.append([entry.name, tested_features[:-1], expected, result, expected == result])

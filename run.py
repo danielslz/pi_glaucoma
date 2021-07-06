@@ -7,16 +7,16 @@ from extraction import analyze_cdr
 from extraction.cup import cup_extraction
 from extraction.disc import disc_extraction
 from measure import get_cdr
-from features import LBP, HARALICK, COLOR_MOMENTS
+from features import LBP, HARALICK, COLOR_MOMENTS, describe_lbp
 from features.regnize import analyze_features
 
 
 BASE_DIR = dirname(abspath(__file__))
 
-# # preprocess
-# src_path = BASE_DIR + '/images/raw/'
-# dst_path = BASE_DIR + '/images/preprocessed/'
-# pre_process_imgs(src_path, dst_path)
+## preprocess
+src_path = BASE_DIR + '/images/raw/'
+dst_path = BASE_DIR + '/images/preprocessed/'
+pre_process_imgs(src_path, dst_path)
 
 ## cdr extraction
 src_path = BASE_DIR + '/images/preprocessed/'
@@ -49,14 +49,15 @@ features = [LBP, HARALICK, COLOR_MOMENTS]
 analyze_features(src_path, dest_path, features)
 
 
-## stand alone cdr extraction
+# # stand alone cdr extraction
 # src_path = BASE_DIR + '/images/preprocessed/'
-# open image
+
 # img = io.imread(src_path + '/G-1-L.png')
 # img = io.imread(src_path + '/N-7-L.png')
 # img = io.imread(src_path + '/N-2-R.png')
 # img = io.imread(src_path + '/N-1-L.png')
 
+# print(describe_lbp(img))
 
 # cup extraction
 # cup_area = cup_extraction(img, show_steps=True)

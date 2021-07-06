@@ -1,8 +1,9 @@
 import numpy as np
 
-from skimage import img_as_ubyte
+from skimage import img_as_ubyte, exposure
 from skimage.color import rgb2gray
 from skimage.feature import local_binary_pattern, greycomatrix, greycoprops
+from skimage.util.shape import view_as_windows
 
 
 LBP = 'lbp'
@@ -10,15 +11,15 @@ HARALICK = 'haralick'
 COLOR_MOMENTS = 'color_moments'
 
 
-def describe_lbp(img, radius=12):
+def get_lbp_histograms(img, radius):
     eps = 1e-7
     n_points = 8 * radius
-    img = rgb2gray(img)
     # compute the Local Binary Pattern representation
     # of the image, and then use the LBP representation
     # to build the histogram of patterns
     lbp = local_binary_pattern(img, n_points, radius, method="uniform")
-    (hist, _) = np.histogram(lbp.ravel(), bins=np.arange(0, n_points + 3), range=(0, n_points + 2))
+    n_bins = int(lbp.max() + 1)
+    (hist, _) = np.histogram(lbp.ravel(), density=True, bins=n_bins, range=(0, n_bins))
     # normalize the histogram
     hist = hist.astype("float")
     hist /= (hist.sum() + eps)
@@ -26,8 +27,39 @@ def describe_lbp(img, radius=12):
     return hist.tolist()
 
 
-def describe_haralick(img):
+def describe_lbp(img, radius=1):
+    # rgb to gray
     img = rgb2gray(img)
+
+    # contrast stretching
+    p2, p98 = np.percentile(img, (2, 98))
+    img = exposure.rescale_intensity(img, in_range=(p2, p98))
+
+    # split image in 16 blocks
+    M = img.shape[0]//3
+    N = img.shape[1]//3
+    blocks = [img[x:x+M, y:y+N] for x in range(0, img.shape[0], M) for y in range(0, img.shape[1], N)]
+
+    histograms = []
+    # compute lbp for each block
+    for block in blocks:
+        histograms += get_lbp_histograms(block, radius)
+    
+    # append zeros to make list at same size
+    total = ((radius * 8) + 2) * 16
+    histograms.extend([0.0] * (total - len(histograms)))
+
+    return histograms
+
+
+def describe_haralick(img):
+    # rgb to gray
+    img = rgb2gray(img)
+    
+    # contrast stretching
+    p2, p98 = np.percentile(img, (2, 98))
+    img = exposure.rescale_intensity(img, in_range=(p2, p98))
+    
     img = img_as_ubyte(img)
     img = np.asarray(img, dtype='int32')
     angles = [0, np.pi/4, np.pi/2, (3 * np.pi)/4]
