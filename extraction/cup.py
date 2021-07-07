@@ -54,17 +54,17 @@ def cup_extraction(img, show_steps=False):
     if show_steps:
         imgs = [
             {'data': img, 'title': 'Original (a)'},
-            {'data': img_contrast, 'title': 'Alargamento de Contraste (b)'},
+            {'data': img_contrast, 'title': 'Alargamento de contraste (b)'},
             {'data': g_img, 'title': 'Canal Verde (c)'},
-            {'data': g_img_rescale, 'title': 'Alargamento de Contraste (d)'},
+            {'data': g_img_rescale, 'title': 'Alargamento de contraste (d)'},
             {'data': g_img_inverted, 'title': 'Transformação negativa (e)'},
             {'data': g_img_opening, 'title': 'Abertura (f)'},
             {'data': g_img_inverted_2, 'title': 'Transformação negativa (g)'},
-            {'data': g_img_region_grow, 'title': 'Region Growing (h)'},
-            {'data': g_img_convex_hull, 'title': 'Convex Hull (i)'},
-            {'data': g_img_ellipse, 'title': 'Preenchimento de Elipse (j)'},
+            {'data': g_img_region_grow, 'title': 'Region growing (h)'},
+            {'data': g_img_convex_hull, 'title': 'Fecho convexo (i)'},
+            {'data': g_img_ellipse, 'title': 'Preenchimento de elipse (j)'},
             {'data': g_img_canny, 'title': 'Canny (k)'},
-            {'data': g_img_cup, 'title': 'Escavação do Disco Óptico (l)'},
+            {'data': g_img_cup, 'title': 'Escavação do disco óptico (l)'},
             # {'data': output, 'title': 'cup extraction'},
         ]
 

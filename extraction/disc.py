@@ -50,16 +50,16 @@ def disc_extraction(img, show_steps=False):
     if show_steps:
         imgs = [
             {'data': img, 'title': 'Original (a)'},
-            {'data': img_contrast, 'title': 'Alargamento de Contraste (b)'},
+            {'data': img_contrast, 'title': 'Alargamento de contraste (b)'},
             {'data': img_hsv, 'title': 'Conversão para HSV (c)'},
             {'data': img_value, 'title': 'Canal Valor (d)'},
-            {'data': img_hsv_contrast, 'title': 'Alargamento de Contraste (e)'},
+            {'data': img_hsv_contrast, 'title': 'Alargamento de contraste (e)'},
             {'data': img_threshold, 'title': 'Otsu\'s Threshold (f)'},
             {'data': img_opening, 'title': 'Abertura (g)'},
-            {'data': img_convex_hull, 'title': 'Convex Hull (h)'},
-            {'data': img_ellipse, 'title': 'Preenchimento de Elipse (i)'},
+            {'data': img_convex_hull, 'title': 'Fecho convexo (h)'},
+            {'data': img_ellipse, 'title': 'Preenchimento de elipse (i)'},
             {'data': img_canny, 'title': 'Canny (j)'},
-            {'data': img_disc, 'title': 'Disco Óptico (k)'},
+            {'data': img_disc, 'title': 'Disco óptico (k)'},
             # {'data': output, 'title': 'disc extraction'},
         ]
 
