@@ -1,6 +1,6 @@
 # pi_glaucoma
 
-* Copy images from dataset RIM-ONE v3 in images folder
+* Copy images from dataset RIM-ONE v3 in images/raw folder
 
 * Install dependecies with pip
 ```
