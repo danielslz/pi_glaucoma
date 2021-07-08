@@ -167,7 +167,7 @@ def opening_and_cleaning_area(img, element_size=15):
         if count > 3:
             break
     
-    # output = clear_border(output)
+    output = clear_border(output)
 
     # all zero, means glacoma, invert img
     if np.count_nonzero(output == True) == 0:
